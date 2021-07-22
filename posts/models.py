@@ -19,6 +19,20 @@ class Category(models.Model):
     def post_count(self):
         return self.post.all().count()
 
+class Tag(models.Model):
+    title = models.CharField(max_length=100)
+    slug = models.SlugField(editable=False)
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(Tag, self).save(*args, **kwargs)
+
+    def post_count(self):
+        return self.post.all().count()
+
 
 class Post(models.Model):
     title = models.CharField(max_length=100)
@@ -28,6 +42,8 @@ class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     slug = models.SlugField(default="slug", editable=False)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, default=2, related_name="post")
+    tag = models.ManyToManyField(Tag, related_name='post', blank=True)
+    slider_post = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -35,3 +51,4 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
